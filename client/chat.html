@@ -1,21 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat</title>
     <script type="module">
       import { io } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
-      const socket = io();
+      const socket = io({
+        auth: {
+          serverOffset: 0,
+          username: JSON.parse(localStorage.getItem("username")) ?? anonymous,
+          //token
+        },
+      });
 
       document.addEventListener("DOMContentLoaded", () => {
         const chatForm = document.getElementById("chatForm");
         const input = document.getElementById("input");
         const messages = document.getElementById("messages");
 
-        socket.on("chat message", (msg) => {
-          const item = `<li>${msg}</li>`;
+        socket.on("chat message", (msg, serverOffset, username) => {
+          const item = `<li>
+            <p> ${msg} </p>
+            <small>${username}</small>
+            </li>`;
           messages.insertAdjacentHTML("beforeend", item);
+          socket.auth.serverOffset = serverOffset;
         });
 
         chatForm.addEventListener("submit", (e) => {
@@ -27,14 +37,19 @@
         });
       });
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <section>
       <ul id="messages"></ul>
       <form id="chatForm">
-        <input type="text" id="input" placeholder="Type a message" autocomplete="off" />
+        <input
+          type="text"
+          id="input"
+          placeholder="Type a message"
+          autocomplete="off"
+        />
         <button type="submit">Send</button>
       </form>
     </section>
-</body>
+  </body>
 </html>
