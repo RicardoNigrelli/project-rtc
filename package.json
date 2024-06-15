@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@libsql/client": "^0.6.2",
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "express": "4.19.2",
     "morgan": "1.10.0",

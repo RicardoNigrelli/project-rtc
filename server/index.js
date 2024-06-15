@@ -4,56 +4,129 @@ import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { createClient } from "@libsql/client";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
 const port = process.env.PORT || 3000;
-
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-    connectionStateRecovery: {}
+  connectionStateRecovery: {},
 });
 
 const db = createClient({
-url: "libsql://joint-rapture-ricardonigrelli.turso.io",
-authToken: process.env.DB_TOKEN
-})
+  url: "libsql://joint-rapture-ricardonigrelli.turso.io",
+  authToken: process.env.DB_TOKEN,
+});
 
 await db.execute(`CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content TEXT)`)
+    content TEXT)`);
 
-io.on("connection", (socket) => {
-    console.log("User connected");
+await db.execute(`CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT)`);
 
-    socket.on("disconnect", () => {
-      console.log("User disconnected");
-    });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-    socket.on('chat message', async (msg) => {
-let result
-try {
-    result = await db.execute({
-        sql: `INSERT INTO messages (content) VALUES (:msg)`,
-        args: { msg }
-    })
-} catch (e) {
-    console.error(e)
-    return
-}
-        io.emit('chat message', msg, result.lastInsertRowid.toString());
-    });
-})
-
+app.use(express.static(path.join(__dirname, "../client")));
 
 app.use(logger("dev"));
 
 app.get("/", (req, res) => {
-  res.sendFile(process.cwd() + "/client/index.html");
+  res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
 server.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
+io.on("connection", (socket) => {
+  console.log("User connected");
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+
+  socket.on("chat message", async (msg) => {
+    let result;
+    try {
+      result = await db.execute({
+        sql: `INSERT INTO messages (content) VALUES (:msg)`,
+        args: { msg },
+      });
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+    io.emit("chat message", msg, result.lastInsertRowid.toString());
+  });
+
+  socket.on("register", async ({ username, password }) => {
+    try {
+      const existingUser = await db.execute({
+        sql: `SELECT * FROM users WHERE username = :username`,
+        args: { username },
+      });
+
+      if (existingUser.rows.length > 0) {
+        socket.emit("register", {
+          success: false,
+          message: "Username already taken",
+        });
+        console.log(`Registration failed: Username ${username} already taken`);
+        return;
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const result = await db.execute({
+        sql: `INSERT INTO users (username, password) VALUES (:username, :password)`,
+        args: { username, password: hashedPassword },
+      });
+      socket.emit("register", { success: true });
+      console.log(
+        `User ${username} registered with id ${result.lastInsertRowid}`
+      );
+    } catch (error) {
+      console.error(error);
+      socket.emit("register", {
+        success: false,
+        message: "Registration failed",
+      });
+    }
+  });
+
+  socket.on("login", async ({ username, password }) => {
+    try {
+      const result = await db.execute({
+        sql: `SELECT * FROM users WHERE username = :username`,
+        args: { username },
+      });
+
+      if (result.rows.length === 0) {
+        socket.emit("login", { success: false, message: "User not found" });
+        console.log(`User ${username} not found`);
+        return;
+      }
+
+      const user = result.rows[0];
+
+      const passwordMatches = await bcrypt.compare(password, user.password);
+      if (passwordMatches) {
+        socket.emit("login", { success: true });
+        console.log(`User ${username} logged in`);
+      } else {
+        socket.emit("login", { success: false, message: "Invalid password" });
+        console.log(`User ${username} login failed`);
+      }
+    } catch (error) {
+      console.error(error);
+      socket.emit("login", { success: false, message: "Login failed" });
+    }
+  });
+});
