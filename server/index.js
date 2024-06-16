@@ -140,7 +140,7 @@ io.on("connection", async (socket) => {
       })
 
       results.rows.forEach(row => {
-        socket.emit("chat message", row.content, row.id.toString(), row.username);
+        socket.emit("chat message", row.content, row.id.toString(), row.user);
       });
 
     } catch (error) {

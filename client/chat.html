@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Chat</title>
+    <link rel="stylesheet" href="styles/chat.css" />
     <script type="module">
       import { io } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
       const socket = io({
@@ -21,8 +23,8 @@
 
         socket.on("chat message", (msg, serverOffset, username) => {
           const item = `<li>
+            <small>${username}:</small>
             <p> ${msg} </p>
-            <small>${username}</small>
             </li>`;
           messages.insertAdjacentHTML("beforeend", item);
           socket.auth.serverOffset = serverOffset;
@@ -39,17 +41,43 @@
     </script>
   </head>
   <body>
-    <section>
-      <ul id="messages"></ul>
-      <form id="chatForm">
-        <input
-          type="text"
-          id="input"
-          placeholder="Type a message"
-          autocomplete="off"
-        />
-        <button type="submit">Send</button>
-      </form>
+    <section id="chat-container">
+      <nav id="navbar">
+        <!-- <h1 id="navbar-title">Chat</h1> -->
+        <img class="navbar-img" src="assets/files.png" alt="files" />
+        <img class="navbar-img" src="assets/video.png" alt="camera" />
+        <img class="navbar-img" src="assets/audio.png" alt="audio" />
+        <img class="navbar-img" src="assets/activities.png" alt="activities" />
+        <img class="navbar-img" src="assets/info.png" alt="info" />
+      </nav>
+      <div id="interaction-container">
+        <header id="for">
+          <h4>Para:</h4>
+        </header>
+        <ul id="messages"></ul>
+      </div>
+      <div id="send-container">
+        <header id="chat-tools">
+          <h4>Fuente</h4>
+          <h4>Emojis</h4>
+          <h4>Guiños</h4>
+          <h4>Gift</h4>
+          <h4>Zumbido</h4>
+        </header>
+        <form id="chatForm">
+          <textarea
+            type="text"
+            id="input"
+            placeholder="Type a message"
+            autocomplete="off"
+          ></textarea>
+          <button type="submit">Send</button>
+        </form>
+        <footer id="chat-footer">
+          <div>A</div>
+          <div>D</div>
+        </footer>
+      </div>
     </section>
   </body>
 </html>
