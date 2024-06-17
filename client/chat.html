@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Chat</title>
+    <link rel="stylesheet" href="styles/reset.css" />
     <link rel="stylesheet" href="styles/chat.css" />
     <script type="module">
       import { io } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
@@ -43,39 +44,82 @@
   <body>
     <section id="chat-container">
       <nav id="navbar">
-        <!-- <h1 id="navbar-title">Chat</h1> -->
-        <img class="navbar-img" src="assets/files.png" alt="files" />
-        <img class="navbar-img" src="assets/video.png" alt="camera" />
-        <img class="navbar-img" src="assets/audio.png" alt="audio" />
-        <img class="navbar-img" src="assets/activities.png" alt="activities" />
-        <img class="navbar-img" src="assets/info.png" alt="info" />
+        <div class="navbar-img-container">
+          <img id="navbar-invitar" src="assets/invitar.png" alt="files" />
+          <p>Invitar</p>
+        </div>
+        <div class="navbar-img-container">
+          <img id="navbar-archivos" src="assets/archivos.png" alt="camera" />
+          <p>Archivos</p>
+        </div>
+        <div class="navbar-img-container">
+          <img id="navbar-camara" src="assets/camara.png" alt="audio" />
+          <p>Cámara</p>
+        </div>
+        <div class="navbar-img-container">
+          <img id="navbar-audio" src="assets/audio.png" alt="activities" />
+          <p>Audio</p>
+        </div>
+        <div class="navbar-img-container">
+          <img
+            id="navbar-actividades"
+            src="assets/actividades.png"
+            alt="info"
+          />
+          <p>Actividades</p>
+        </div>
+        <div class="navbar-img-container">
+          <img id="navbar-juegos" src="assets/juegos.png" alt="info" />
+          <p>Juegos</p>
+        </div>
       </nav>
       <div id="interaction-container">
         <header id="for">
           <h4>Para:</h4>
+          <img id="img-header" src="assets/camara.png" alt="" />
         </header>
         <ul id="messages"></ul>
       </div>
       <div id="send-container">
         <header id="chat-tools">
-          <h4>Fuente</h4>
-          <h4>Emojis</h4>
-          <h4>Guiños</h4>
-          <h4>Gift</h4>
-          <h4>Zumbido</h4>
+          <div class="tools">
+            <h4 class="logo-fuente">A</h4>
+            <h4>Fuente</h4>
+          </div>
+          <div class="tools">
+            <h4 class="tool-logo">😀</h4>
+            <h4>▼</h4>
+          </div>
+          <div class="tools">
+            <h4 class="tool-logo">😉</h4>
+            <h4>Guiños ▼</h4>
+          </div>
+
+          <div class="tools">
+            <h4 class="tool-logo">🏞</h4>
+            <h4>Fondos ▼</h4>
+          </div>
+
+          <div class="tools">
+            <h4 class="tool-logo">🎁</h4>
+            <h4>▼</h4>
+          </div>
+          <div class="tools">
+            <h4 class="tool-logo">🥴</h4>
+          </div>
         </header>
         <form id="chatForm">
           <textarea
             type="text"
             id="input"
-            placeholder="Type a message"
+            placeholder=""
             autocomplete="off"
           ></textarea>
-          <button type="submit">Send</button>
+          <button id="buttonSend" type="submit">Enviar</button>
         </form>
         <footer id="chat-footer">
-          <div>A</div>
-          <div>D</div>
+          <h4 id="footer-dibujo">🖌</h4>
+          <h4 id="footer-fuente">A</h4>
         </footer>
       </div>
     </section>
